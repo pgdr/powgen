@@ -174,14 +174,22 @@ def _initialize(schedule):
 
 def _update(schedule, day, hour, minute):
     total = 0
+    devs = set()
     for elt in schedule:
-        if elt.start and (hour, minute) > elt.start and random.random() > 0.8:
+        if (
+            elt.start is not None
+            and (hour, minute) > elt.start
+            and random.random() > 0.8
+        ):
             elt.unit.on = True
-        if elt.end and (hour, minute) > elt.end and random.random() > 0.8:
+        if elt.end is not None and (hour, minute) > elt.end and random.random() > 0.8:
             elt.unit.on = False
 
+        if elt.unit.on:
+            devs.add(elt.name)
+
         total += elt.unit.tick()
-    return total
+    return total, devs
 
 
 def game(schedule, days=5):
