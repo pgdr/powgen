@@ -200,13 +200,25 @@ def _update(schedule, day, hour, minute):
 
 def game(schedule, days=5):
     schedule = _initialize(schedule)
+
+    all_devices = sorted(elt.name for elt in schedule)
+    print(f"datetime,power,{','.join(all_devices)}")
+
+    def dev_chi(devs):
+        for d in all_devices:
+            if d in devs:
+                yield "1"
+            else:
+                yield "0"
+
     for day in range(days):
         # if day % 7 in (5, 6):   # weekend
         for hour in range(24):
             for minute in range(60):
                 power, devs = _update(schedule, day, hour, minute)
+                power += perlin(days * 24 * 60 + hour * 24 + minute)
                 print(
-                    f"2020-02-{17+day},{hour}:{minute:02d},{power:.1f},{','.join(sorted(devs))}"
+                    f"2020-02-{17+day:02d} {hour:02d}:{minute:02d}:00.000000,{power:.1f},{','.join(dev_chi(devs))}"
                 )
 
 
