@@ -6,8 +6,14 @@ import enum
 from dataclasses import dataclass
 from collections import namedtuple
 import yaml
+import noise
+
 
 Schedule = namedtuple("Schedule", "name unit start end")
+
+
+def perlin(time):
+    return max(0.0, math.pi * 20 + 50 * noise.pnoise1(time * 0.005, 1))
 
 
 @dataclass
