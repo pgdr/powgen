@@ -1,0 +1,1 @@
+# Syntetic electricity profile generator
