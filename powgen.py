@@ -198,8 +198,10 @@ def game(schedule, days=5):
         # if day % 7 in (5, 6):   # weekend
         for hour in range(24):
             for minute in range(60):
-                power = _update(schedule, day, hour, minute)
-                print(f"Day {day+1}, {hour}:{minute:02d}\t{power} W")
+                power, devs = _update(schedule, day, hour, minute)
+                print(
+                    f"2020-02-{17+day},{hour}:{minute:02d},{power:.1f},{','.join(sorted(devs))}"
+                )
 
 
 def main():
@@ -210,6 +212,7 @@ def main():
 
     with open(argv[1]) as sch_file:
         schedule = list(parse_schedule(yaml.safe_load(sch_file)))
+
     game(schedule)
 
 
