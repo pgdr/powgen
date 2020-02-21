@@ -4,6 +4,12 @@ bathroom:
     power: 1600
     temperature: 30
 
+washroom:
+  config:
+    id: HeatCable
+    power: 1900
+    temperature: 28
+
 hallway:
   config:
     id: HeatCable
@@ -13,16 +19,23 @@ hallway:
 car:
   config:
     id: Charger
-    power: 5000
-  start: 20
-  end: "7:45"
+    power: 9000
+    capacity: 40000
+  start: "16:00"
+
+elbike:
+  config:
+    id: Charger
+    power: 4000
+    capacity: 10000
+  start: "17:00"
 
 stove:
   config:
     id: Stove
-    power: 4000
-  start: 16
-  end: "16:30"
+    power: 8000
+  start: "16:15"
+  end: "16:45"
 
 coffee:
   config:

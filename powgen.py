@@ -119,16 +119,19 @@ class CoffeePot:
 
 
 class Charger:
-    def __init__(self, power):
+    def __init__(self, power, capacity):
         self.dev = Device(
             power=power, activation=Activation.sigmoid, profile=Profile.on
         )
+        self.capacity = capacity
         self.on = False
         self.on_time = 0
 
     def tick(self):
         if self.on:
             self.on_time += 1
+            if self.on_time * self.dev.power / 60.0 > self.capacity:
+                self.on = False
             return self.dev.compute(time=self.on_time)
         else:
             self.on_time = 0
@@ -150,6 +153,7 @@ def _parse_entry(name, config):
     nam = typ["id"]
     power = typ.get("power")
     temp = typ.get("temperature")
+    cap = typ.get("capacity")
     if nam == "HeatCable":
         return HeatCable(power=power, temperature=temp)
     elif nam == "Stove":
@@ -157,7 +161,7 @@ def _parse_entry(name, config):
     elif nam == "CoffeePot":
         return CoffeePot(power=power)
     elif nam == "Charger":
-        return Charger(power=power)
+        return Charger(power=power, capacity=cap)
     raise ValueError(f"Unknown type {nam}")
 
 
