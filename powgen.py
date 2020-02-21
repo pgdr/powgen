@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import math
+import random
 import enum
 from dataclasses import dataclass
 from collections import namedtuple
@@ -31,8 +33,20 @@ class Device:
     activation: Activation
     profile: Profile
 
-    def compute(self, on_time):
-        return self.power
+    def _profile(self, p, on_time):
+        if self.profile == Profile.on:
+            return p
+        if on_time % 19 == 17:
+            return 0
+        return p
+
+    def compute(self, time):
+        power = self.power
+        if self.activation == Activation.linear:
+            power = self.power / max(1, (4.5 - time))
+        if self.activation == Activation.sigmoid:
+            power = self.power * (1.0 / (1.0 + pow(math.e, -(time / 13.0))))
+        return self._profile(power, time)
 
 
 class HeatCable:
@@ -53,8 +67,10 @@ class HeatCable:
                 return 0
             else:
                 self.on_time += 1
+                self.heat += (self.dev.power / 1000.0) * 0.7 * random.random()
                 return self.dev.compute(time=self.on_time)
         else:
+            self.heat -= 1 / 60
             if self.heat < self.temperature * 0.95:
                 self.on = True
                 return self.dev.compute(time=self.on_time)
@@ -113,8 +129,14 @@ class Charger:
             return 0
 
 
-def _parse_time(config):
-    return config.get("start"), config.get("end")
+def _parse_time(t):
+    if isinstance(t, int):
+        return t, 0
+    if not t:
+        return None
+    if ":" in t:
+        return [int(x) for x in t.split(":")]
+    return int(t), 0
 
 
 def _parse_entry(name, config):
@@ -135,7 +157,12 @@ def _parse_entry(name, config):
 
 def parse_schedule(sch):
     for name, cfg in sch.items():
-        yield Schedule(name, _parse_entry(name, cfg), *_parse_time(cfg))
+        yield Schedule(
+            name,
+            _parse_entry(name, cfg),
+            _parse_time(cfg.get("start")),
+            _parse_time(cfg.get("end")),
+        )
 
 
 def _initialize(schedule):
@@ -148,6 +175,11 @@ def _initialize(schedule):
 def _update(schedule, day, hour, minute):
     total = 0
     for elt in schedule:
+        if elt.start and (hour, minute) > elt.start and random.random() > 0.8:
+            elt.unit.on = True
+        if elt.end and (hour, minute) > elt.end and random.random() > 0.8:
+            elt.unit.on = False
+
         total += elt.unit.tick()
     return total
 
@@ -159,7 +191,7 @@ def game(schedule, days=5):
         for hour in range(24):
             for minute in range(60):
                 power = _update(schedule, day, hour, minute)
-                print(power)
+                print(f"Day {day+1}, {hour}:{minute:02d}\t{power} W")
 
 
 def main():
@@ -170,7 +202,7 @@ def main():
 
     with open(argv[1]) as sch_file:
         schedule = list(parse_schedule(yaml.safe_load(sch_file)))
-    print(game(schedule))
+    game(schedule)
 
 
 if __name__ == "__main__":
