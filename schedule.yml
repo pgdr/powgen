@@ -1,0 +1,32 @@
+bathroom:
+  config:
+    id: HeatCable
+    power: 1600
+    temperature: 30
+
+hallway:
+  config:
+    id: HeatCable
+    power: 1300
+    temperature: 23
+
+car:
+  config:
+    id: Charger
+    power: 5000
+  start: 20
+  end: 7:45
+
+stove:
+  config:
+    id: Stove
+    power: 4000
+  start: 16
+  end: 16:30
+
+coffee:
+  config:
+    id: CoffeePot
+    power: 400
+  start: 7:15
+  end: 7:30

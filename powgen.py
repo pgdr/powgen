@@ -3,6 +3,7 @@
 import enum
 from dataclasses import dataclass
 from collections import namedtuple
+import yaml
 
 Schedule = namedtuple("Schedule", "unit start stop")
 
@@ -39,6 +40,9 @@ class HeatCable:
         self.temperature = temperature
         self.heat = self.temperature
 
+    def tick(self):
+        pass
+
 
 class Stove:
     def __init__(self, power):
@@ -46,10 +50,18 @@ class Stove:
             power=power, activation=Activation.linear, profile=Profile.PWM
         )
 
+    def tick(self):
+        pass
 
-class CoffeePot(HeatCable):
+
+class CoffeePot:
     def __init__(self, power):
-        self.heater = HeatCable(power, 80)
+        self.dev = Device(
+            power=power, activation=Activation.boolean, profile=Profile.on
+        )
+
+    def tick(self):
+        pass
 
 
 class Charger:
@@ -58,19 +70,44 @@ class Charger:
             power=power, activation=Activation.sigmoid, profile=Profile.on
         )
 
+    def tick(self):
+        pass
+
+
+def _parse_time(config):
+    return config.get("start"), config.get("end")
+
+
+def _parse_entry(name, config):
+    typ = config["config"]
+    nam = typ["id"]
+    power = typ.get("power")
+    temp = typ.get("temperature")
+    if nam == "HeatCable":
+        return HeatCable(power=power, temperature=temp)
+    elif nam == "Stove":
+        return Stove(power=power)
+    elif nam == "CoffeePot":
+        return CoffeePot(power=power)
+    elif nam == "Charger":
+        return Charger(power=power)
+    raise ValueError(f"Unknown type {nam}")
+
+
+def parse_schedule(sch):
+    for name, cfg in sch.items():
+        yield {name: (_parse_entry(name, cfg), _parse_time(cfg))}
+
 
 def main():
     from sys import argv
 
-    if len(argv) != 1:
-        exit("Usage: powgen")
+    if len(argv) != 2:
+        exit("Usage: powgen schedule.yml")
 
-    schedule = {
-        "bathroom": Schedule(HeatCable(1600, 30), None, None),
-        "car": Schedule(Charger(5000), Clock(20), Clock(7, 45)),
-        "stove": Schedule(Stove(4000), Clock(16), Clock(16, 30)),
-        "coffee": Schedule(CoffeePot(400), Clock(7, 15), Clock(7, 30)),
-    }
+    with open(argv[1]) as sch_file:
+        schedule = list(parse_schedule(yaml.safe_load(sch_file)))
+    print(schedule)
 
 
 if __name__ == "__main__":
