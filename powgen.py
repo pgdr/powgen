@@ -67,7 +67,7 @@ class HeatCable:
 
     def tick(self):
         if self.on:
-            if self.heat > self.temperature * 1.05:
+            if self.heat > self.temperature * 1.2:
                 self.on = False
                 self.on_time = 0
                 return 0
@@ -76,8 +76,8 @@ class HeatCable:
                 self.heat += (self.dev.power / 1000.0) * 0.7 * random.random()
                 return self.dev.compute(time=self.on_time)
         else:
-            self.heat -= 1 / 60
-            if self.heat < self.temperature * 0.95:
+            self.heat -= 0.5 / 60 + math.log(max(0.1, self.heat)) / 20.0
+            if self.heat < self.temperature * 0.8:
                 self.on = True
                 return self.dev.compute(time=self.on_time)
             else:
