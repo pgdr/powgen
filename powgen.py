@@ -135,7 +135,7 @@ def _parse_time(t):
     if not t:
         return None
     if ":" in t:
-        return [int(x) for x in t.split(":")]
+        return tuple(int(x) for x in t.split(":"))
     return int(t), 0
 
 
