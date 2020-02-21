@@ -15,18 +15,18 @@ car:
     id: Charger
     power: 5000
   start: 20
-  end: 7:45
+  end: "7:45"
 
 stove:
   config:
     id: Stove
     power: 4000
   start: 16
-  end: 16:30
+  end: "16:30"
 
 coffee:
   config:
     id: CoffeePot
     power: 400
-  start: 7:15
-  end: 7:30
+  start: "7:15"
+  end: "7:30"
